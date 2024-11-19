@@ -103,3 +103,8 @@ object torneo {
 
     method cataciones(plato)= catadores.foreach({catador => catador.califarPlato(plato)})
 } 
+
+
+
+
+// ------------------------------

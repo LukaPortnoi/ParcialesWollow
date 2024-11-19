@@ -1,0 +1,30 @@
+import mensajeria.*
+
+describe "Wolloksapp" {
+
+	const alf = new Usuario(memoriaLibre = 100, idUsuario = "Alfredo")
+	const rasta = new Usuario(memoriaLibre = 1000, idUsuario = "Nahuel")
+	const chat = new Chat(usuarios = [ alf, rasta ])
+	const mensaje = new Mensaje(contenido = new Texto(texto = "Hola"), emisor = alf)
+
+	
+
+	test "Saber el espacio que ocupa un chat" {
+		assert.equals(10.2, chat.espacioOcupado())
+	}
+
+	test "Enviar un mensaje a un chat" {
+        chat.enviarMensaje(mensaje)
+		assert.that(chat.mensajes().contains(mensaje))
+	}
+	
+	test "Mensajes mas pesados" {
+		assert.equals([mensaje], alf.mensajePesadosDeCadaChat())
+	}
+	
+	
+	test "Buscar" {
+		assert.equals([chat], alf.buscar("Hola"))
+	}
+
+}
