@@ -1,5 +1,3 @@
-
-
 class Plato{
 
    method precio() = self.valoracion() * 300 + self.precioExtra()
@@ -76,14 +74,14 @@ class Parrillada inherits Plato{
 
 class Comensal{
     var dinero
-    var property tipo
+    var property habito
 
     method darseGusto() {
         self.comprarPlato(parrillaMichael.mejorPlatoPara1(self) )
     }
     method comprarPlato(plato) {
         dinero -= plato.precio()
-        parrillaMichael.venderPlato(plato)
+        parrillaMichael.venderPlato(plato, self)
     }
 
     // method mejorPlato() = filter parrillaMichael.platoMayorValoracion() 
@@ -91,29 +89,58 @@ class Comensal{
 
     method puedePermitirselo (plato) = plato.precio() <= dinero
 
+    method agregarDinero(cantidad) {dinero += cantidad}
+
+
+    method cambiarHabito(nuevoHabito) {habito = nuevoHabito}
+    method problemasGastricos() {self.cambiarHabito(celiaco)}
+    method decisionEconomica() {
+        if(habito.esFino()) {
+            self.cambiarHabito(todoTerreno)
+        }
+    }
 
 }
 
 object celiaco{
     method leAgrada(plato) = plato.esAptoCeliaco()
+    method esFino() = false
 }
 
 object paladarFino{
     method leAgrada(plato) = plato.esEspecial() || plato.valoracion() > 100
+    method esFino() = true
 }
 
 object todoTerreno{
     method leAgrada(plato) = true
+    method esFino() = false
 }
 
 object parrillaMichael{
     var platos = []
-    var dinero
+    var dinero = 0
+    var comensales =[]
 
-    method venderPlato(plato) {dinero += plato.precio()}
+    method venderPlato(plato,comensal) {
+        dinero += plato.precio()
+        comensales.add(comensal)
+    }
 
-    method platosQueLeGustanA(comensal) = platos.filter({plato => comensal.tipo().leAgrada(plato)})
-    method platosQuePuedeComprar(comensal) = (platos.filter({plato => plato.precio() <= comensal.dinero()})
+    method agregarPlatoMenu(plato)  {platos.add(plato)}
+
+    method platosQueLeGustanA(comensal) = platos.filter({plato => comensal.habito().leAgrada(plato)})
+    
+    method puedeComprarPlatos(comensal) {
+    if(!self.platosQuePuedeComprar(comensal).isEmpty())  {
+        return self.platosQuePuedeComprar(comensal)
+    }
+    else{
+        throw new Exception(message = "No hay plato que pueda comprar")
+        }
+    } 
+
+    method platosQuePuedeComprar (comensal) = platos.filter({plato => plato.precio() <= comensal.dinero()}) 
 
     
     method platoMayorValoracion(platosTotales) = platosTotales.max({plato => plato.valoracion()})
@@ -122,11 +149,13 @@ object parrillaMichael{
 
     method mejorPlatoPara1(comensal) {        
         var posiblesPlatos = platos
-        posiblesPlatos = self.platosQuePuedeComprar(comensal)
+        posiblesPlatos = self.puedeComprarPlatos(comensal)
         posiblesPlatos = self.platosQueLeGustanA(comensal)
         return self.platoMayorValoracion(posiblesPlatos)
     }
 
         
-    method mejorPlatoPara2(comensal)= self.platoMayorValoracion(self.platosQueLeGustanA(comensal).platosQuePuedeComprar(comensal))
+    method mejorPlatoPara2(comensal)= self.platoMayorValoracion(self.platosQueLeGustanA(comensal).puedeComprarPlatos(comensal))
+
+    method hacerPromocion(cantidadDinero) {comensales.forEach({comensal => comensal.agregarDinero(cantidadDinero)})}
 }
